@@ -1,15 +1,62 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8" />
     <title>Result</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        color: #011b37;
+        display: flex;
+        flex-direction: column;
+      }
+      main {
+        width: 650px;
+        height: 450px;
+        padding: 10px;
+        margin: auto;
+        flex-direction: column;
+      }
+      header {
+        background-color: #022a56;
+        color: #fff;
+        padding: 10px;
+        text-align: center;
+      }
+      button {
+        background-color: #136fbf;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+      }
+      /* Change button color on hover */
+      button:hover {
+        background-color: #0e569e;
+      }
+      footer {
+        background-color: #333;
+        color: #fff;
+        padding: 10px;
+        text-align: center;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+      }
+    </style>
   </head>
 
   <body>
-    <h1>Predictions</h1>
+    <header>
+      <h1>{{selected_model}} Model Prediction</h1>
+    </header>
 
-    <br />
+    <main>
+      <h1>The collision is {{prediction}}</h1>
 
-    <h1>The collision is {{prediction}}</h1>
-
-    <button onclick="history.back()">GO BACK</button>
+      <button onclick="history.back()">Go Back</button>
+    </main>
   </body>
 </html>
