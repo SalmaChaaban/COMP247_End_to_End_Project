@@ -5,9 +5,18 @@ import pandas as pd
 
 app = Flask(__name__)
 
-# Load the trained model
-model = joblib.load("fitted_random_forest.pkl")
+# Dictionary mapping model names to their corresponding pickle files
+models = {
+    "Logistic Regression": "fitted_logistic_regression.pkl",
+    "Neural Network": "fitted_neural_network.pkl",
+    #"Support Vector Machine": "svm.pkl",
+    "Random Forest": "fitted_random_forest.pkl",
+    #"Ensemble": "ensemble.pkl"
+}
+
+# Load the pipeline
 preprocessor = joblib.load("fitted_pipeline.pkl")
+
 cols = ['ACCLOC', 'TRAFFCTL', 'LIGHT', 'RDSFCOND', 'IMPACTYPE',
        'INVTYPE', 'INVAGE', 'VEHTYPE', 'MANOEUVER', 'DRIVACT', 'DRIVCOND',
        'AG_DRIV', 'HOOD_158']
@@ -36,6 +45,13 @@ def result():
     AG_DRIV = np.array([request.form['AG_DRIV']])
     HOOD_158 = np.array([request.form['HOOD_158']])
     
+    # Retrieve selected model name from the form
+    selected_model = request.form['model']
+    
+    # Load the selected model
+    model_file = models[selected_model]
+    model = joblib.load(model_file)
+    
     # Concatenate form data
     final = np.concatenate([ACCLOC, TRAFFCTL, LIGHT, RDSFCOND, IMPACTYPE, INVTYPE,
                             INVAGE, VEHTYPE, MANOEUVER, DRIVACT, DRIVCOND, AG_DRIV,
@@ -46,7 +62,8 @@ def result():
     data_trans = preprocessor.transform(data)
     data_reshaped = data_trans.reshape(1, -1)
     prediction = model.predict(data_reshaped)
-    return render_template("result.html", prediction=prediction[0])
+    
+    return render_template("result.html", prediction=prediction[0], selected_model=selected_model)
     
 
 if __name__ == "__main__":
