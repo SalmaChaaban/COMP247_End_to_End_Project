@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fatality Predictor</title>
+    <style>
+
+        #title {
+            color: white;
+            background-color: #3e8ae5;
+            text-align: center; 
+            width: 100%; 
+            height: 15vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #footer {
+            color: white;
+            background-color: #3e8ae5;
+            text-align: center; 
+            width: 100%; 
+            height: 5vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #report {
+            display: inline-block;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+            justify-content: center;
+            background-color: #aacfed;
+            text-align: center; 
+        }
+
+        #back-btn {
+            border: none;
+            margin-bottom: 10px;
+            background-color: peachpuff;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: lock;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="title">
+        <h1>Accident Class Predictor</h1>
+    </div>
+    <div id="report">
+        <h3>Model</h3>
+        <p id="model-name">{{ name }}</p>
+        <h3>Result</h3>
+        <p id="result">{{ prediction }}</p>
+        <h3>Model testing accuracy</h3>
+        <p id="accuracy">{{ testing_accuracy }}</p>
+
+        <div id="buttons">
+            <input type="submit" id="back-btn" value="Back">
+        </div>
+    </div>
+    <div id="footer">
+        <p> Group 1 Project Submission</p>
+    </div>
+
+    <script>
+        // Add event listener to the button
+        document.getElementById("back-btn").addEventListener("click", function() {
+            // Redirect to the index page
+            window.location.href = "/";
+        });
+    </script>
+</body>
+</html>

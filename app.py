@@ -1,70 +1,86 @@
-from flask import Flask, request, render_template, jsonify
-import joblib
-import numpy as np
+from flask import Flask, render_template, request, jsonify
 import pandas as pd
+import joblib
+from flask_cors import CORS
+import json
 
 app = Flask(__name__)
+CORS(app)
 
-# Dictionary mapping model names to their corresponding pickle files
-models = {
-    "Logistic Regression": "fitted_logistic_regression.pkl",
-    "Neural Network": "fitted_neural_network.pkl",
-    #"Support Vector Machine": "svm.pkl",
-    "Random Forest": "fitted_random_forest.pkl",
-    #"Ensemble": "ensemble.pkl"
-}
+#---------------------------------------------------------
 
-# Load the pipeline
-preprocessor = joblib.load("fitted_pipeline.pkl")
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-cols = ['ACCLOC', 'TRAFFCTL', 'LIGHT', 'RDSFCOND', 'IMPACTYPE',
-       'INVTYPE', 'INVAGE', 'VEHTYPE', 'MANOEUVER', 'DRIVACT', 'DRIVCOND',
-       'AG_DRIV', 'HOOD_158']
+#---------------------------------------------------------
 
-# route the app
-@app.route("/")
-def home():
-    return render_template("index.html")
+@app.route('/cat_fields.json')
+def cat_fields():
+    with open('cat_fields.json', 'r') as f:
+        data = json.load(f)
+    return jsonify(data)
 
-@app.route("/result", methods=["POST"])
-def result():
-    print("Received form submission")
-    
-    # Retrieve form data
-    ACCLOC = np.array([request.form['ACCLOC']])
-    TRAFFCTL = np.array([request.form['TRAFFCTL']])
-    LIGHT = np.array([request.form['LIGHT']])
-    RDSFCOND = np.array([request.form['RDSFCOND']])
-    IMPACTYPE = np.array([request.form['IMPACTYPE']])
-    INVTYPE = np.array([request.form['INVTYPE']])
-    INVAGE = np.array([request.form['INVAGE']])
-    VEHTYPE = np.array([request.form['VEHTYPE']])
-    MANOEUVER = np.array([request.form['MANOEUVER']])
-    DRIVACT = np.array([request.form['DRIVACT']])
-    DRIVCOND = np.array([request.form['DRIVCOND']])
-    AG_DRIV = np.array([request.form['AG_DRIV']])
-    HOOD_158 = np.array([request.form['HOOD_158']])
-    
-    # Retrieve selected model name from the form
-    selected_model = request.form['model']
-    
-    # Load the selected model
-    model_file = models[selected_model]
-    model = joblib.load(model_file)
-    
-    # Concatenate form data
-    final = np.concatenate([ACCLOC, TRAFFCTL, LIGHT, RDSFCOND, IMPACTYPE, INVTYPE,
-                            INVAGE, VEHTYPE, MANOEUVER, DRIVACT, DRIVCOND, AG_DRIV,
-                            HOOD_158])
-    
-    final = np.array(final)
-    data = pd.DataFrame([final], columns=cols)
-    data_trans = preprocessor.transform(data)
-    data_reshaped = data_trans.reshape(1, -1)
-    prediction = model.predict(data_reshaped)
-    
-    return render_template("result.html", prediction=prediction[0], selected_model=selected_model)
-    
+#---------------------------------------------------------
 
-if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+@app.route('/predict', methods=['POST'])
+def predict():
+    params_dict = {}
+    # Get all entries from form into dictionary
+    for field_name in request.form:
+        params_dict[field_name.upper()] = request.form[field_name]
+    # Seperate the model from the features
+    model_type = params_dict.pop('MODEL')
+    # Convert the entries for the remaining features to a df
+    params_df = pd.DataFrame([params_dict])
+
+
+    print(params_dict)
+    print(model_type)
+    print(params_df)
+
+    pipeline = joblib.load(open('fitted_pipeline.pkl','rb'))
+    print(type(pipeline))
+
+    trans_params = pipeline.transform(params_df)
+
+    print(trans_params.shape)
+
+    if model_type == 'nn':
+        model = joblib.load(open('fitted_neural_network.pkl','rb'))
+        name = "Neural Network"
+        testing_accuracy = "85.6%"
+    elif model_type == 'rf':
+        model = joblib.load(open('fitted_random_forest.pkl','rb'))
+        name = "Random Forest"
+        testing_accuracy = "87.8%"
+    elif model_type == 'svm':
+        model = joblib.load(open('fitted_svm.pkl','rb'))
+        name = "Support Vector Machine"
+        testing_accuracy = "84.0%"
+    elif model_type == 'ensemble':
+        model = joblib.load(open('fitted_ensemble_learning.pkl','rb'))
+        name = "Support Vector Machine"
+        testing_accuracy = "87.7%"
+   
+    prediction = model.predict(trans_params)[0]
+    
+    print(prediction)
+    print(type(prediction[0]))
+
+    #prediction_proba = model.predict_proba(trans_params)
+    #print(prediction_proba)
+
+    print('-'*50)
+
+    print('Form submitted successfully')
+
+    return render_template('results.html', name=name, testing_accuracy=testing_accuracy, prediction=prediction)
+#---------------------------------------------------------
+
+
+
+#---------------------------------------------------------
+
+if __name__ == '__main__':
+    app.run(debug=True)

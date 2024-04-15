@@ -1,384 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Collisions Prediction</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fatality Predictor</title>
     <style>
-      body {
-        margin: 0;
-        padding: 0;
-        font-family: Arial, sans-serif;
-        color: #011b37;
-        display: flex;
-        flex-direction: column;
-      }
 
-      header {
-        background-color: #022a56;
-        color: #fff;
-        padding: 10px;
-        text-align: center;
-      }
+        #title {
+            color: white;
+            background-color: #3e8ae5;
+            text-align: center; 
+            width: 100%; 
+            height: 15vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-      main {
-        padding: 20px;
-      }
-      form {
-        width: 650px;
-        height: 450px;
-        padding: 10px;
-      }
-      button {
-        background-color: #136fbf;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        cursor: pointer;
-      }
-      /* Change button color on hover */
-      button:hover {
-        background-color: #0e569e;
-      }
-      footer {
-        background-color: #333;
-        color: #fff;
-        padding: 10px;
-        text-align: center;
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-      }
+        #footer {
+            color: white;
+            background-color: #3e8ae5;
+            text-align: center; 
+            width: 100%; 
+            height: 5vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .form-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #aacfed;
+        }
+
+        .form-wrapper {
+            width: 500px;
+        }
+
+        .form-params {
+            margin-bottom: 10px;
+        }
+
+        .form-params label {
+            width: 175px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .form-params input,
+        .form-params select {
+            width: 200px;
+            height: 25px;
+            display: inline-block;
+        }
+
+        .entries {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .form-model {
+            width: 400px;
+            display: inline-block;
+            margin-bottom: 10px;
+            align-items: center;
+            text-align: center;
+        }
+
+        #buttons {
+            width: 400px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        #reset-btn,
+        #submit-btn {
+            border: none;
+            color: black;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+
+        #reset-btn {
+            background-color: lightcoral;
+        }
+
+        #submit-btn {
+            background-color: limegreen;
+        }
+
     </style>
-  </head>
-  <body>
-    <header>
-      <h1>Machine Learning Model Deployment</h1>
-    </header>
-    <main>
-      <center>
-        <form
-          id="prediction-form"
-          action="/result"
-          method="post"
-          align="justify"
-          action="/result"
-          method="post"
-        >
-          <label>Select Model:</label><br />
-          <input
-            type="radio"
-            id="logistic_regression"
-            name="model"
-            value="Logistic Regression"
-            required
-          />
-          <label for="logistic_regression">Logistic Regression</label>
+</head>
+<body>
+    <div id="title">
+        <h1>Accident Class Predictor</h1>
+    </div>
+    <div class="form-container">
+        <div class="form-wrapper">
+            <h3 class="entries">Parameter Selection</h3>
+            <form action="/predict" method="POST" id="parameterForm">
+                
+                <div class="form-params">
+                    <label for="latitude">Latitude:</label>
+                    <input type="range" id="latitude" name="latitude" min="43.589678" max="43.855445" step="0.0001" oninput="latitudeValue.value = latitude.value">
+                    <output id="latitudeValue">43.7</output>
+                </div>
+                
+                <div class="form-params">
+                    <label for="longitude">Longitude:</label>
+                    <input type="range" id="longitude" name="longitude" min="-79.63467" max="-79.122974" step="0.0001" oninput="longitudeValue.value = longitude.value">
+                    <output id="longitudeValue">-79.3</output>
+                </div>
 
-          <input
-            type="radio"
-            id="neural_network"
-            name="model"
-            value="Neural Network"
-            required
-          />
-          <label for="neural_network">Neural Network</label>
+                <div id="dynamic"></div>
+            
+            <div class="form-model">
+                <h3 class="entries">Model Selection</h3>
+                  
+                <input type="radio" id="rf1" name="model" value="rf">
+                <label for="rf">Random Forest</label>
+                <br>
 
-          <input
-            type="radio"
-            id="random_forest"
-            name="model"
-            value="Random Forest"
-            required
-          />
-          <label for="random_forest">Random Forest</label>
+                <input type="radio" id="nn1" name="model" value="nn">
+                <label for="nn">Neural Network</label>
+                <br>
 
-          <input type="radio" id="ensemble" name="model" value="Ensemble" />
-          <label for="ensemble">Ensemble</label><br /><br /><br />
+                <input type="radio" id="svm1" name="model" value="svm">
+                <label for="svm">Support Vector Machine</label>
+		<br>
 
-          <label for="ACCLOC">Accident Location:</label><br />
-          <select
-            id="ACCLOC"
-            name="ACCLOC"
-            oninput="ACCLOC_disp.value= ACCLOC.value"
-          >
-            <option value="At Intersection">At Intersection</option>
-            <option value="Intersection Related">Intersection Related</option>
-            <option value="Non Intersection">Non Intersection</option>
-            <option value="At/Near Private Drive">At/Near Private Drive</option>
-            <option value="Underpass or Tunnel">Underpass or Tunnel</option>
-            <option value="Private Driveway">Private Driveway</option>
-            <option value="Overpass or Bridge">Overpass or Bridge</option>
-            <option value="Trail">Trail</option>
-            <option value="Laneway">Laneway</option></select
-          ><br /><br />
-
-          <label for="TRAFFCTL">Traffic Control Type:</label><br />
-          <select
-            id="TRAFFCTL"
-            name="TRAFFCTL"
-            oninput="TRAFFCTL_disp.value= TRAFFCTL.value"
-          >
-            <option value="Traffic Signal">Traffic Signal</option>
-            <option value="No Control">No Control</option>
-            <option value="Stop Sign">Stop Sign</option>
-            <option value="Pedestrian Crossover">Pedestrian Crossover</option>
-            <option value="Traffic Controller">Traffic Controller</option>
-            <option value="Yield Sign">Yield Sign</option>
-            <option value="School Guard">School Guard</option>
-            <option value="Police Control">Police Control</option>
-            <option value="Streetcar (Stop for)">
-              Streetcar (Stop for)
-            </option></select
-          ><br /><br />
-
-          <label for="LIGHT">Light:</label><br />
-          <select
-            id="LIGHT"
-            name="LIGHT"
-            oninput="LIGHT_disp.value= LIGHT.value"
-          >
-            <option value="Daylight">Daylight</option>
-            <option value="Dark">Dark</option>
-            <option value="Dark, artificial">Dark, artificial</option>
-            <option value="Dusk">Dusk</option>
-            <option value="Dusk, artificial">Dusk, artificial</option>
-            <option value="Dawn">Dawn</option>
-            <option value="Daylight, artificial">Daylight, artificial</option>
-            <option value="Dawn, artificial">Dawn, artificial</option>
-            <option value="Other">Other</option></select
-          ><br /><br />
-
-          <label for="RDSFCOND">Road Surface Condition:</label><br />
-          <select
-            id="RDSFCOND"
-            name="RDSFCOND"
-            oninput="RDSFCOND_disp.value= RDSFCOND.value"
-          >
-            <option value="Dry">Dry</option>
-            <option value="Wet">Wet</option>
-            <option value="Slush">Slush</option>
-            <option value="Other">Other</option>
-            <option value="Loose Snow">Loose Snow</option>
-            <option value="Ice">Ice</option>
-            <option value="Packed Snow">Packed Snow</option>
-            <option value="Loose Sand or Gravel">
-              Loose Sand or Gravel
-            </option></select
-          ><br /><br />
-
-          <label for="IMPACTYPE">Impact Type:</label><br />
-          <select
-            id="IMPACTYPE"
-            name="IMPACTYPE"
-            oninput="IMPACTYPE_disp.value= IMPACTYPE.value"
-          >
-            <option value="Pedestrian Collisions">Pedestrian Collisions</option>
-            <option value="Turning Movement">Turning Movement</option>
-            <option value="Approaching">Approaching</option>
-            <option value="Angle">Angle</option>
-            <option value="Rear End">Rear End</option>
-            <option value="Cyclist Collisions">Cyclist Collisions</option>
-            <option value="SMV Other">SMV Other</option>
-            <option value="Sideswipe">Sideswipe</option>
-            <option value="SMV Unattended Vehicle">
-              SMV Unattended Vehicle
-            </option>
-            <option value="Other">Other</option></select
-          ><br /><br />
-
-          <label for="INVTYPE">Involvement Type:</label><br />
-          <select
-            id="INVTYPE"
-            name="INVTYPE"
-            oninput="INVTYPE_disp.value= INVTYPE.value"
-          >
-            <option value="Driver">Driver</option>
-            <option value="Motorcycle Driver">Motorcycle Driver</option>
-            <option value="Truck Driver">Truck Driver</option>
-            <option value="Moped Driver">Moped Driver</option>
-            <option value="Driver - Not Hit">Driver - Not Hit</option></select
-          ><br /><br />
-
-          <label for="INVAGE">Age of Involved Party:</label><br />
-          <select
-            id="INVAGE"
-            name="INVAGE"
-            oninput="INVAGE_disp.value= INVAGE.value"
-          >
-            <option value="unknown">unknown</option>
-            <option value="45 to 49">45 to 49</option>
-            <option value="55 to 59">55 to 59</option>
-            <option value="30 to 34">30 to 34</option>
-            <option value="40 to 44">40 to 44</option>
-            <option value="20 to 24">20 to 24</option>
-            <option value="60 to 64">60 to 64</option>
-            <option value="15 to 19">15 to 19</option>
-            <option value="25 to 29">25 to 29</option>
-            <option value="35 to 39">35 to 39</option>
-            <option value="50 to 54">50 to 54</option>
-            <option value="90 to 94">90 to 94</option>
-            <option value="65 to 69">65 to 69</option>
-            <option value="70 to 74">70 to 74</option>
-            <option value="80 to 84">80 to 84</option>
-            <option value="75 to 79">75 to 79</option>
-            <option value="85 to 89">85 to 89</option>
-            <option value="Over 95">Over 95</option>
-            <option value="10 to 14">10 to 14</option></select
-          ><br /><br />
-
-          <label for="VEHTYPE">Vehicle Type:</label><br />
-          <select
-            id="VEHTYPE"
-            name="VEHTYPE"
-            oninput="VEHTYPE_disp.value= VEHTYPE.value"
-          >
-            <option value="Automobile, Station Wagon">
-              Automobile, Station Wagon
-            </option>
-            <option value="Motorcycle">Motorcycle</option>
-            <option value="Truck - Open">Truck - Open</option>
-            <option value="Municipal Transit Bus (TTC)">
-              Municipal Transit Bus (TTC)
-            </option>
-            <option value="Passenger Van">Passenger Van</option>
-            <option value="Delivery Van">Delivery Van</option>
-            <option value="Other">Other</option>
-            <option value="Taxi">Taxi</option>
-            <option value="Moped">Moped</option>
-            <option value="Pick Up Truck">Pick Up Truck</option>
-            <option value="Truck-Tractor">Truck-Tractor</option>
-            <option value="Street Car">Street Car</option>
-            <option value="Truck - Closed (Blazer, etc)">
-              Truck - Closed (Blazer, etc)
-            </option>
-            <option value="Bus (Other) (Go Bus, Gray Coach)">
-              Bus (Other) (Go Bus, Gray Coach)
-            </option>
-            <option value="Truck - Dump">Truck - Dump</option>
-            <option value="Intercity Bus">Intercity Bus</option>
-            <option value="Construction Equipment">
-              Construction Equipment
-            </option></select
-          ><br /><br />
-
-          <label for="MANOEUVER">Manoeuver:</label><br />
-          <select
-            id="MANOEUVER"
-            name="MANOEUVER"
-            oninput="MANOEUVER_disp.value= MANOEUVER.value"
-          >
-            <option value="Turning Left">Turning Left</option>
-            <option value="Turning Right">Turning Right</option>
-            <option value="Going Ahead">Going Ahead</option>
-            <option value="Stopped">Stopped</option>
-            <option value="Slowing or Stopping">Slowing or Stopping</option>
-            <option value="Changing Lanes">Changing Lanes</option>
-            <option value="Unknown">Unknown</option>
-            <option value="Overtaking">Overtaking</option>
-            <option value="Making U Turn">Making U Turn</option>
-            <option value="Parked">Parked</option>
-            <option value="Pulling Away from Shoulder or Curb">
-              Pulling Away from Shoulder or Curb
-            </option>
-            <option value="Other">Other</option>
-            <option value="Reversing">Reversing</option>
-            <option value="Merging">Merging</option>
-            <option value="Pulling Onto Shoulder or towardCurb">
-              Pulling Onto Shoulder or towardCurb
-            </option></select
-          ><br /><br />
-
-          <label for="DRIVACT">Apparent Driver Action:</label><br />
-          <select
-            id="DRIVACT"
-            name="DRIVACT"
-            oninput="DRIVACT_disp.value= DRIVACT.value"
-          >
-            <option value="Failed to Yield Right of Way">
-              Failed to Yield Right of Way
-            </option>
-            <option value="Disobeyed Traffic Control">
-              Disobeyed Traffic Control
-            </option>
-            <option value="Driving Properly">Driving Properly</option>
-            <option value="Improper Passing">Improper Passing</option>
-            <option value="Following too Close">Following too Close</option>
-            <option value="Improper Turn">Improper Turn</option>
-            <option value="Other">Other</option>
-            <option value="Lost control">Lost control</option>
-            <option value="Improper Lane Change">Improper Lane Change</option>
-            <option value="Exceeding Speed Limit">Exceeding Speed Limit</option>
-            <option value="Speed too Fast For Condition">
-              Speed too Fast For Condition
-            </option>
-            <option value="Wrong Way on One Way Road">
-              Wrong Way on One Way Road
-            </option>
-            <option value="Speed too Slow">Speed too Slow</option></select
-          ><br /><br />
-
-          <label for="DRIVCOND">Driver Condition:</label><br />
-          <select
-            id="DRIVCOND"
-            name="DRIVCOND"
-            oninput="DRIVCOND_disp.value= DRIVCOND.value"
-          >
-            <option value="Unknown">Unknown</option>
-            <option value="Normal">Normal</option>
-            <option value="Ability Impaired, Alcohol Over .08">
-              Ability Impaired, Alcohol Over .08
-            </option>
-            <option value="Had Been Drinking">Had Been Drinking</option>
-            <option value="Inattentive">Inattentive</option>
-            <option value="Medical or Physical Disability">
-              Medical or Physical Disability
-            </option>
-            <option value="Ability Impaired, Alcohol">
-              Ability Impaired, Alcohol
-            </option>
-            <option value="Ability Impaired, Drugs">
-              Ability Impaired, Drugs
-            </option>
-            <option value="Fatigue">Fatigue</option>
-            <option value="Other">Other</option></select
-          ><br /><br />
-
-          <label>Aggressive and Distracted Driving Collision:</label><br />
-          <input
-            type="radio"
-            id="AG_DRIV"
-            name="AG_DRIV"
-            value="Yes"
-            oninput="AG_DRIV_disp.value= AG_DRIV.value"
-            required
-          />
-          <label for="ag_driv_yes">Yes</label><br />
-          <input
-            type="radio"
-            id="AG_DRIV"
-            name="AG_DRIV"
-            value="No"
-            oninput="AG_DRIV_disp.value= AG_DRIV.value"
-            required
-          />
-          <label for="ag_driv_no">No</label><br /><br />
-
-          <label for="HOOD_158">Neighbourhood ID (1 - 173):</label><br />
-          <input
-            type="number"
-            id="HOOD_158"
-            name="HOOD_158"
-            min="1"
-            max="173"
-            oninput="HOOD_158_disp.value= HOOD_158.value"
-            required
-          />
-          <br /><br />
-
-          <button type="submit">Predict</button>
-          <button type="reset" value="RESET">Reset</button>
+                <input type="radio" id="svm1" name="model" value="ensemble">
+                <label for="svm">Ensemble Learning</label>
+                <br>
+            </div>
+            
+	    <div id="buttons">
+                <input type="submit" id="submit-btn" value="Submit">
+                <input type="reset" id="reset-btn" value="Reset">
+            </div>
         </form>
-      </center>
-    </main>
-  </body>
+        </div>
+    </div>
+    <!-- <script src="{{ url_for('static', filename='script.js') }}"></script> -->
+    <script>
+        console.log("starting script");
+        fetch('/cat_fields.json')
+        .then(response => response.json())
+        .then(data => {
+            console.log('fetched json')
+            Object.keys(data).forEach(key => {
+                const values = data[key];
+                const selectElement = document.createElement('select');
+                selectElement.name = key.toUpperCase(); 
+                selectElement.id = key.toUpperCase();
+    
+                values.forEach(value => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = value; // Dont format value - necessary for predictions
+                    optionElement.textContent = value;
+                    selectElement.appendChild(optionElement);
+                });
+    
+                const form = document.getElementById('dynamic');
+                const formParams = document.createElement('div');
+                formParams.className = 'form-params';
+                const label = document.createElement('label');
+                label.htmlFor = key.toUpperCase(); 
+                label.textContent = key;
+                formParams.appendChild(label);
+                formParams.appendChild(selectElement);
+                form.appendChild(formParams);
+            });
+        })
+        .catch(error => console.error('Error fetching data:', error));
+    
+    </script>
+    <div id="footer">
+        <p> Group 1 Project Submission</p>
+    </div>
+</body>
 </html>
