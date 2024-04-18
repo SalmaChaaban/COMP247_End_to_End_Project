@@ -49,7 +49,7 @@ def predict():
     if model_type == 'nn':
         model = joblib.load(open('fitted_neural_network.pkl','rb'))
         name = "Neural Network"
-        testing_accuracy = "85.6%"
+        testing_accuracy = "86.5%"
     elif model_type == 'rf':
         model = joblib.load(open('fitted_random_forest.pkl','rb'))
         name = "Random Forest"
@@ -62,6 +62,10 @@ def predict():
         model = joblib.load(open('fitted_ensemble_learning.pkl','rb'))
         name = "Support Vector Machine"
         testing_accuracy = "87.7%"
+    elif model_type == 'lr':
+        model = joblib.load(open('fitted_logistic_regression.pkl','rb'))
+        name = "Logistic Regression"
+        testing_accuracy = "71.3%"
    
     prediction = model.predict(trans_params)[0]
     
